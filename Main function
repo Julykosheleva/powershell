@@ -1,0 +1,2618 @@
+#Добавляем флаг для того, чтобы знать, когда пользователь хочет закончить форму
+$flag = $true
+
+
+#основной цикл, чтобы была возможность вернуться в главное меню
+While ($flag) {
+
+#Создание формы главного меню с шестью кнопками
+Add-Type -AssemblyName System.Windows.Forms
+ 
+$Form = New-Object system.Windows.Forms.Form
+$Form.Text = "Form"
+$Form.BackColor = "#E2F5FF"
+$Form.TopMost = $true
+$Form.Width = 800
+$Form.Height = 400
+$Form.MaximizeBox = $false
+$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+$FormLabel1 = New-Object System.Windows.Forms.Label
+$FormLabel1.Text = "Выберите действие"
+$FormLabel1.Location = New-Object System.Drawing.Point(300,10)
+$FormLabel1.AutoSize = $true
+$FormLabel1.Font = "Monotype Corsiva,18"
+$Form.Controls.Add($FormLabel1)
+
+$button1 = New-Object system.windows.Forms.Button
+$button1.BackColor = "#84CBFF"
+$button1.Text = "Обновить штатное расписание"
+$button1.Width = 200
+$button1.Height = 80
+$button1.location = new-object system.drawing.point(50,60)
+$button1.DialogResult = [System.Windows.Forms.DialogResult]::YES
+$button1.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button1)
+
+$button2 = New-Object system.windows.Forms.Button
+$button2.BackColor = "#84CBFF"
+$button2.Text = "Посмореть пользователей группы и сделать отчет"
+$button2.Width = 200
+$button2.Height = 80
+$button2.location = new-object system.drawing.point(300,60)
+$button2.DialogResult = [System.Windows.Forms.DialogResult]::NO
+$button2.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button2)
+
+$button0 = New-Object system.windows.Forms.Button
+$button0.BackColor = "#84CBFF"
+$button0.Text = "Взаимодействие активных пользователей с группами безопасности"
+$button0.Width = 200
+$button0.Height = 80
+$button0.location = new-object system.drawing.point(550,60)
+$button0.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$button0.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button0)
+
+$button5 = New-Object system.windows.Forms.Button
+$button5.BackColor = "#84CBFF"
+$button5.Text = "Информация о неактивных пользователях или компьютерах"
+$button5.Width = 200
+$button5.Height = 80
+$button5.location = new-object system.drawing.point(50,160)
+$button5.DialogResult = [System.Windows.Forms.DialogResult]::ABORT
+$button5.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button5)
+
+$button3 = New-Object system.windows.Forms.Button
+$button3.BackColor = "#84CBFF"
+$button3.Text = "Создать учетную запись"
+$button3.Width = 200
+$button3.Height = 80
+$button3.location = new-object system.drawing.point(300,160)
+$button3.DialogResult = [System.Windows.Forms.DialogResult]::RETRY
+$button3.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button3)
+
+$button6 = New-Object system.windows.Forms.Button
+$button6.BackColor = "#84CBFF"
+$button6.Text = "Отчет об ОС и обновлениях на компьютерах в конкретной OU"
+$button6.Width = 200
+$button6.Height = 80
+$button6.location = new-object system.drawing.point(550,160)
+$button6.DialogResult = [System.Windows.Forms.DialogResult]::IGNORE
+$button6.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button6)
+
+$button4 = New-Object system.windows.Forms.Button
+$button4.BackColor = "#84CBFF"
+$button4.Text = "Выход"
+$button4.Width = 200
+$button4.Height = 80
+$button4.location = new-object system.drawing.point(300,260)
+$button4.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+$button4.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button4)
+
+$result = $form.ShowDialog()
+$Form.Dispose()
+
+#на этом этапе пользователь выбирает дальнейшее действие, и в зависимости от его выбора, мы переходим в конкретный if
+
+if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+	
+	#создание формы с вопросом о названии группы и OU 
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.TopMost = $true
+	$Form.BackColor = "#E2F5FF"
+	$Form.Width = 800
+	$Form.Height = 585
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите название OU"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(10,40)
+	$textBox1.Size = New-Object System.Drawing.Size(770,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Выберите название группы, с которой хотите взаимодействовать"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,70)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$My_Table = Get-ADGroup -filter *
+	$listBox = New-Object System.Windows.Forms.ListBox
+	$listBox.SelectionMode = 'MultiExtended'
+	$listBox.Location = New-Object System.Drawing.Point(10,90)
+	$listBox.Size = New-Object System.Drawing.Size(410,20)
+	$listBox.Height = 350
+	$listBox.Sorted = $true
+	ForEach ($Item In $My_Table) {
+		[void] $listBox.Items.Add($Item.Name)
+	}
+	$form.Controls.Add($listBox)
+
+	$listBox2 = New-Object System.Windows.Forms.ListBox
+	$listBox2.SelectionMode = 'MultiExtended'
+	$listBox2.Location = New-Object System.Drawing.Point(10,450)
+	$listBox2.Size = New-Object System.Drawing.Size(770,20)
+	$listBox2.Height = 40
+	$listBox2.Sorted = $true
+	[void] $listBox2.Items.Add('Добавить пользователей')
+	[void] $listBox2.Items.Add('Удалить пользователей')
+	$form.Controls.Add($listBox2)
+	
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,500)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::OK
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,500)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	#записываем названия группы и OU в переменные
+	$DomainName = $textBox1.text
+	$GroupName = $listBox.text
+	$select = $listbox2.text
+	$Group = Get-ADGroup -Identity $GroupName
+
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 160
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Подтвердите действие"
+	$textBox2.Width = 770
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(10,10)
+	$textBox2.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($textBox2)
+
+	if ($select -eq 'Добавить пользователей') {
+		$string = 'Вы действительно хотите добавить пользователей из ' + $Domainname + ' в группу ' + $groupname + '?'
+	} else {
+		$string = 'Вы действительно хотите удалить пользователей из ' + $Domainname + ' из группы ' + $groupname + '?'
+	}
+	
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = $string
+	$textBox2.Width = 770
+	$textBox2.Height = 40
+	$textBox2.location = new-object system.drawing.point(10,30)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Да"
+	$button3.Width = 100
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(10,80)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Отмена"
+	$button1.Width = 200
+	$button1.Height = 30
+	$button1.location = new-object system.drawing.point(330,80)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	#добавляем или удаляем всех пользователей данного OU в данную группу безопасности
+	$My_table = Get-ADUser -Filter {Enabled -eq $True -and Mail -like '*'} -SearchBase $DomainName
+	if ($select -eq 'Добавить пользователей') {
+		ForEach ($Item In $My_Table) {
+			try {
+				Add-ADGroupMember -identity $Group -Members $Item
+			} catch {}
+		}
+	} else {
+		ForEach ($Item In $My_Table) {
+			try {
+				Remove-ADGroupMember –confirm:$false -identity $Group -Members $Item
+			} catch {}
+		}
+	}
+
+} elseif ($result -eq [System.Windows.Forms.DialogResult]::YES) {
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 120
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Отформатировать файл или обновить данные AD?"
+	$textBox2.Width = 770
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(10,10)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Отформатировать"
+	$button3.Width = 200
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(10,40)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Обновить"
+	$button4.Width = 100
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(260,40)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 30
+	$button1.location = new-object system.drawing.point(500,40)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+	Function fun1 {
+	$f1 = new-object Windows.Forms.OpenFileDialog
+	$f1.InitialDirectory = pwd
+	$f1.Filter = "All Files (*.*)|*.*"
+	$f1.ShowHelp = $true
+	[void]$f1.ShowDialog()
+	$Global:FirstFile = $f1.FileName
+	$FormLabel0.Text = $f1.FileName
+	}
+
+	Function fun2 {
+	$f2 = new-object Windows.Forms.OpenFileDialog
+	$f2.InitialDirectory = pwd
+	$f2.Filter = "All Files (*.*)|*.*"
+	$f2.ShowHelp = $true
+	[void]$f2.ShowDialog()
+	$Global:abbreviations = Import-Csv -Encoding default -Path $f2.filename -Delimiter ';'
+	$FormLabel1.Text = $f2.filename
+	}
+	
+	#создание формы, которая спрашивает названия файлов
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 200
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Выбрать файл Excel"
+	$button4.Width = 200
+	$button4.Height = 20
+	$button4.location = new-object system.drawing.point(10,10)
+	$button4.add_click({fun1})
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button5 = New-Object system.windows.Forms.Button
+	$button5.BackColor = "#84CBFF"
+	$button5.Text = "Выбрать файл с сокращениями отделов"
+	$button5.Width = 300
+	$button5.Height = 20
+	$button5.location = new-object system.drawing.point(300,10)
+	$button5.add_click({fun2})
+	$button5.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button5)
+	
+	$FormLabel0 = New-Object System.Windows.Forms.Label
+	$FormLabel0.Text = "не выбран"
+	$FormLabel0.Location = New-Object System.Drawing.Point(10,35)
+	$FormLabel0.Width = 200
+	$FormLabel0.Height = 15
+	$FormLabel0.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel0)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "не выбран"
+	$FormLabel1.Location = New-Object System.Drawing.Point(300,35)
+	$FormLabel1.Width = 300
+	$FormLabel1.Height = 15
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите название файла, куда сохранить итоговую таблицу"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,60)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox3 = New-Object System.Windows.Forms.TextBox
+	$textBox3.Location = New-Object System.Drawing.Point(10,90)
+	$textBox3.Size = New-Object System.Drawing.Size(770,20)
+	$textBox3.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox3)
+	
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$SecondFile = $textBox3.text
+	$Form.Dispose()
+
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	#сохранения в формате csv исходного файла и добавление шапки названий
+	$Excel = New-Object -ComObject Excel.Application
+	$WorkBook = $Excel.Workbooks.Open($FirstFile)
+	$Excel.Visible = $False
+	$LogiclDisk = $WorkBook.Worksheets.Item(1)
+
+	$LogiclDisk.Cells.Item(1, 1) = "First"
+	$LogiclDisk.Cells.Item(1, 2) = "Title"
+	$LogiclDisk.Cells.Item(1, 3) = "Cn"
+
+	$WorkBook.SaveAs($SecondFile, 6)
+	$WorkBook.Close($true)
+
+	$csv = @()
+
+	$csv = Import-Csv -Encoding default -Path $SecondFile -Delimiter ';'
+
+	#создание нового файла для записи отформатированных данных
+	$Excel = New-Object -ComObject Excel.Application
+	$Excel.Visible = $false
+	$WorkBook = $Excel.Workbooks.Add()
+	$LogiclDisk = $WorkBook.Worksheets.Item(1)
+
+	#заголовки столбцов
+	$LogiclDisk.Cells.Item(1,1) = 'Title'
+	$LogiclDisk.Cells.Item(1,2) = 'Cn'
+	$LogiclDisk.Cells.Item(1,3) = 'Department'
+	$LogiclDisk.Cells.Item(1,4) = 'Manager'
+
+	$Row = 2
+	$Column = 1
+	$CurrManager = ''
+	$CurrDepartment = ''
+	$CurrBigManager = ''
+	$my_flag = $False
+
+	#создание словаря сокращенных названий отделов для быстрого доступа к ним
+	$abb = @{}
+
+	ForEach ($item In $abbreviations)
+	{
+                $abb[$item.A] = $item.B
+	}
+
+	#цикл для прохода по всем строкам исходного файла и перезаписи в нормальном виде
+	ForEach ($item In $csv) {
+		if (-not([string]::IsNullOrEmpty($item.First))) {
+			$CurrDepartment = $item.first
+			if ($item.First.Contains("правлени") -or $item.First.Contains("Служба") -or $item.First.Contains("Промысел") -or $item.First.Contains("Отдел технической поддержки автоматизированных рабочих мест") -or $item.First.Contains("Отдел информационных технологий и связи") -or $item.First.Contains("Бухгалтерия") -or $item.First.Contains("Финансовый отдел") -or $item.First.Contains("Планово-экономический отдел") -or $item.First.Contains("Участок внутренней логистики") -or $item.First.Contains("Отдел по сопровождению контрактов") -or $item.First.Contains("Административно-хозяйственный") -or $item.First.Contains("документооборота и административной поддержки") -or $item.First.Contains("Отдел переводов") -or $item.First.Contains("Отдел внутренней логистики") -or $item.First.Contains("Отдел транспорта и вахтовых перевозок") -or $item.First.Contains("Отдел внешней логистики и таможни") -or $item.First.Contains("Отдел управления движением материалов и складского учета") -or $item.First.Contains("Сметный отдел") -or $item.First.Contains("Отдел грузоподъемных операций")) {
+				$CurrBigManager = ''
+				$CurrManager = ''
+				$my_flag = $True
+			} else {
+				$CurrManager = ''
+				$my_flag = $False
+			}
+		} elseif ($item.Title.Contains("Всего")) {
+			Continue
+		} elseif ([string]::IsNullOrEmpty($item.First) -and [string]::IsNullOrEmpty($item.Title)) {
+			Continue
+		} else {
+			$LogiclDisk.Cells.Item($Row, $Column) = $item.Title
+			$Column++
+			$LogiclDisk.Cells.Item($Row, $Column) = $item.Cn
+			$Column++
+			if ($CurrDepartment.Length -gt 63) {
+                		$LogiclDisk.Cells.Item($Row, $Column) = $abb[$CurrDepartment]
+                	} else {
+                		$LogiclDisk.Cells.Item($Row, $Column) = $CurrDepartment
+                	}
+			$Column++
+			if ($my_flag) {
+				if ([string]::IsNullOrEmpty($CurrBigManager) -and $item.Title.Contains("ачальник")) {
+					$CurrBigManager = $item.Cn
+				} else {
+					$LogiclDisk.Cells.Item($Row, $Column) = $CurrBigManager
+				}
+			} else {
+				if ([string]::IsNullOrEmpty($CurrManager)) {
+					if ($item.Title.Contains("ачальник отдела")) {
+						$CurrManager = $item.Cn
+					}
+					$LogiclDisk.Cells.Item($Row, $Column) = $CurrBigManager
+				} else {
+					$LogiclDisk.Cells.Item($Row, $Column) = $CurrManager
+				}
+			}	
+			$Column = 1
+			$Row++
+		}
+	}
+
+	#сохраняем отформатированный файл
+	$WorkBook.SaveAs($SecondFile, 6)
+	$WorkBook.Close($true)
+	$Excel.Quit()
+
+	#форма с просьбой вручную сменить кодировку файла
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 120
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Пожалуйста, поменяйте кодировку файла с отформатированным содержимым на UTF8 вручную"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Готово"
+	$button1.Width = 300
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,40)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+
+	} else {
+	
+	Add-Type -AssemblyName System.Windows.Forms
+	
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 150
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Выберите отформатированный файл в формате csv"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.Width = 770
+	$FormLabel1.Height = 15
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 70
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,50)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$form.ShowDialog()
+	$SecondFile = $textBox2.text
+	$Form.Dispose()
+
+	Add-Type -AssemblyName System.Windows.Forms
+	$f1 = new-object Windows.Forms.OpenFileDialog
+	$f1.InitialDirectory = pwd
+	$f1.Filter = "All Files (*.*)|*.*"
+	$f1.ShowHelp = $true
+	[void]$f1.ShowDialog()
+	$File = $f1.FileName
+	
+	$csv = @()
+	$csv = Import-Csv -Encoding UTF8 -Path $File -Delimiter ';'
+
+	$repeating = @()
+	$new = @()
+
+	#записываем имена пользоателей, которые встречаются не один раз
+	$csv | ForEach-Object {
+  		$id = $_.Cn
+  		if ($new -notcontains $id){
+                	$new += $id
+  		} else {
+                	$repeating += $id
+  		}
+	}
+
+	#удаляем пользователей, которые встречаются не один раз
+	$csv = [array]($csv | where {$repeating -notcontains $_.Cn}) 
+
+	$searchbase = Get-ADDomain | ForEach {  $_.DistinguishedName }
+
+	#добавление пользователям начальника, названия отдела и должности в учетную запись AD
+	ForEach ($item In $csv) {
+		$Name=$item.Cn
+		$Manager=$item.Manager
+		$Department=$item.Department
+		$Title = $item.Title
+        	$user=Get-ADUser -Filter {Cn -eq $Name} -Properties * -searchbase $searchbase
+		if ($user -eq $null) {
+                	Out-File -FilePath 'D:/NoinAD.txt' –InputObject $Name -Encoding UTF8 -Append -NoClobber
+		} else {
+			if ($user.enabled) {
+                		Set-ADUser $user -Department $Department -Title $Title
+			}
+		}
+		if ($user) {
+			if (-not([string]::IsNullOrEmpty($Manager))) {
+                	$Manager=Get-ADUser -Filter {Cn -eq $Manager} -searchbase $searchbase
+			if ($Manager -eq $null) {
+                		Out-File -FilePath 'D:/NoManinAD.txt' –InputObject $Name -Encoding UTF8 -Append -NoClobber
+			} elseif (-not([string]::IsNullOrEmpty($item.Manager))) {
+				if ($Manager.enabled) {
+        				Set-ADUser $user -Manager $Manager
+				}
+			}}
+		}
+	}
+	}
+
+} elseif ($result -eq [System.Windows.Forms.DialogResult]::NO) {
+	
+	#форма, которая спрашивает название OU
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 200
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите название OU"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(10,40)
+	$textBox1.Size = New-Object System.Drawing.Size(770,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+	
+	#сохраняем в переменную
+	$DomainName = $textBox1.text
+	
+	#составляем список всех групп безопасности в данном OU
+	$Table = Get-ADGroup -Filter * -SearchBase $DomainName -Properties *
+	
+	#Считаем количество групп
+	$Count = ($Table).Count
+	if ($Count -ne 0) {
+	$some = 100 / $Count
+	$somesome = 100 / $Count
+	}
+	
+	#функция, которая записывает все названия групп в список в форме и параллельно меняет состояние progress bar
+	function foo {
+	$listBox1.Items.clear()
+	ForEach ($Item In $Table) {
+		[void] $listBox1.Items.Add($Item.Cn)
+		$somesome += $some
+		$progressBar.value = $somesome
+	}
+	}
+
+	#функция, которая создает форму и возвращает название выбранной пользователем группы и типов пользователей
+	Function doit {
+	
+	#добавляет основную форму
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 450
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel4 = New-Object System.Windows.Forms.Label
+	$FormLabel4.Text = "Выберите группу"
+	$FormLabel4.Location = New-Object System.Drawing.Point(10, 10)
+	$FormLabel4.Width = 770
+	$FormLabel4.Height = 20
+	$FormLabel4.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel4)
+
+	$listBox1 = New-Object System.Windows.Forms.ListBox
+	$listBox1.SelectionMode = 'MultiExtended'
+	$listBox1.Location = New-Object System.Drawing.Point(10,40)
+	$listBox1.Size = New-Object System.Drawing.Size(770,20)
+	$listBox1.Height = 200
+	$listBox1.Sorted = $true
+	$form.Controls.Add($listBox1)
+
+	$script:progressBar = New-Object System.Windows.Forms.ProgressBar
+	$progressBar.Name = 'ProgressBar'
+	$progressBar.Value = 0
+	$progressBar.Style = "Continuous"
+	$progressBar.Maximum = 100
+	$progressBar.Step = 1
+	$progressBar.Location = New-Object System.Drawing.Size (10,360)
+	$progressBar.Size = New-Object System.Drawing.Size (700,20)
+	$Form.Controls.Add($progressBar)
+	
+	$FormLabel5 = New-Object System.Windows.Forms.Label
+	$FormLabel5.Text = "Выберите тип(ы) пользователей, которых вы ищете"
+	$FormLabel5.Location = New-Object System.Drawing.Point(10, 250)
+	$FormLabel5.Width = 780
+	$FormLabel5.Height = 20
+	$FormLabel5.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel5)
+
+	$listBox2 = New-Object System.Windows.Forms.ListBox
+	$listBox2.SelectionMode = 'MultiExtended'
+	$listBox2.Location = New-Object System.Drawing.Point(10,280)
+	$listBox2.Size = New-Object System.Drawing.Size(770,20)
+	$listBox2.Height = 50
+	$listBox2.Sorted = $true
+	[void] $listBox2.Items.Add('user')
+	[void] $listBox2.Items.Add('computer')
+	[void] $listBox2.Items.Add('group')
+	$form.Controls.Add($listBox2)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,330)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+	
+	$button2 = New-Object system.windows.Forms.Button
+	$button2.BackColor = "#84CBFF"
+	$button2.Text = "Начать выгрузку групп"
+	$button2.Width = 200
+	$button2.Height = 20
+	$button2.location = new-object system.drawing.point(100,330)
+	$button2.add_click({foo})
+	$button2.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button2)
+
+	$result = $form.ShowDialog()
+	$Form.Dispose()
+
+	#делает массив для того, чтобы корректно вернуть переменные из функции
+	$array = @()
+	$array += $listBox1.text
+	ForEach($item in $listBox2.SelectedItems) {$array += $item}
+	return $array
+	}
+
+	#запуск функции и запись в переменные выбранных данных
+	$array = doit
+	
+	$GroupName = $array[0]
+	$Object = @()
+	$mynewflag = $False
+
+	ForEach ($item in $array) {
+	if ($mynewflag) {$Object += $item}
+	$mynewflag = $true
+	}
+
+	#таблицами со всеми пользователями, которые есть в выбранной группе
+	$Table = Get-ADGroupMember $GroupName
+	$NewTable = @()
+
+	#записываем в новую таблицу пользователей только нужного типа из всех в этой группе
+	ForEach ($item In $Table) {
+		if ($item.objectClass -eq 'user') {
+			$type = 'user'
+		} elseif ($item.objectclass -eq 'group') {
+			$type = 'group'
+		} else {
+			$type = 'computer'
+		}
+		if ($Object -contains $type) {
+			if ($type -eq 'user') {
+				$NewTable += $item.samaccountname
+			} elseif ($type -eq 'group') {
+				$NewTable += $item.cn
+			} else {
+				$NewTable += $item.name
+			}
+		}
+	}
+
+	#считаем количество нужных пользователей
+	$Count = ($NewTable).Count
+
+	#создание формы, которая выводит всех запрошенных пользователй и спрашивает, вывести ли их в отчет
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 500
+	$Form.Height = 510
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$listBox = New-Object System.Windows.Forms.ListBox
+	$listBox.SelectionMode = 'MultiExtended'
+	$listBox.Location = New-Object System.Drawing.Point(50,20)
+	$listBox.Size = New-Object System.Drawing.Size(400,20)
+	$listBox.Height = 370
+	$listBox.Sorted = $true
+	ForEach ($Item In $NewTable) {
+		[void] $listBox.Items.Add($Item)
+	}
+	$form.Controls.Add($listBox)
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Вывести отчет в файл?"
+	$textBox2.Width = 500
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(1,400)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Да!"
+	$button3.Width = 50
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(100,430)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Нет"
+	$button4.Width = 50
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(350,430)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+ 
+	$result = $form.ShowDialog()
+	$Form.Dispose()
+
+	#Создает файл
+	if ($result -eq [System.Windows.Forms.DialogResult]::YES) {
+		#создает форму и спрашивает, как выбрать файл
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 800
+		$Form.Height = 120
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$textBox2 = New-Object System.Windows.Forms.Label
+		$textBox2.Text = "Создать файл или выбрать из уже созданных?"
+		$textBox2.Width = 770
+		$textBox2.Height = 20
+		$textBox2.location = new-object system.drawing.point(10,10)
+		$textBox2.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($textBox2)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "Создать"
+		$button3.Width = 100
+		$button3.Height = 30
+		$button3.location = new-object system.drawing.point(10,40)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+ 
+		$button4 = New-Object system.windows.Forms.Button
+		$button4.BackColor = "#84CBFF"
+		$button4.Text = "Выбрать"
+		$button4.Width = 100
+		$button4.Height = 30
+		$button4.location = new-object system.drawing.point(260,40)
+		$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+		$button4.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button4)
+
+		$button1 = New-Object system.windows.Forms.Button
+		$button1.BackColor = "#84CBFF"
+		$button1.Text = "Вернуться в главное меню"
+		$button1.Width = 200
+		$button1.Height = 30
+		$button1.location = new-object system.drawing.point(500,40)
+		$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+		$button1.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button1)
+
+		$newresult = $form.ShowDialog()
+		$Form.Dispose()
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+			continue
+		}
+
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате csv"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+		} else {
+		
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+		$f = new-object Windows.Forms.OpenFileDialog
+		$f.InitialDirectory = pwd
+		$f.Filter = "All Files (*.*)|*.*"
+		$f.ShowHelp = $true
+		[void]$f.ShowDialog()
+		$File = $f.FileName
+		}
+
+		#непосредственно отчет
+		Out-File -FilePath $File -InputObject $GroupName -Encoding UTF8
+        	Out-File -FilePath $File -InputObject $Count -Encoding UTF8 -Append -NoClobber
+        	ForEach ($item In $NewTable) {	
+        		Out-File -FilePath $File -InputObject $item -Encoding UTF8 -Append -NoClobber
+		}
+	}
+} elseif ($result -eq [System.Windows.Forms.DialogResult]::RETRY) {
+	
+	#создает форму и спрашивает, как хотим добавить пользователей
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 130
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Хотите добавить одну учетную запись вручную или несколько из файла?"
+	$textBox2.Width = 770
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(10,10)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Одну"
+	$button3.Width = 100
+	$button3.Height = 40
+	$button3.location = new-object system.drawing.point(10,40)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Несколько"
+	$button4.Width = 100
+	$button4.Height = 40
+	$button4.location = new-object system.drawing.point(120,40)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Проверить наличие созданного пользователя в других организациях"
+	$button4.Width = 300
+	$button4.Height = 40
+	$button4.location = new-object system.drawing.point(240,40)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::OK
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 40
+	$button1.location = new-object system.drawing.point(560,40)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+
+	#Так как выбрали добавить вручную, добавляем форму, которая спрашивает все необходимые данные пользователя
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 420
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel0 = New-Object System.Windows.Forms.Label
+	$FormLabel0.Text = "Введите OU"
+	$FormLabel0.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel0.AutoSize = $true
+	$FormLabel0.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel0)
+
+	$textBox0 = New-Object System.Windows.Forms.TextBox
+	$textBox0.Location = New-Object System.Drawing.Point(10,30)
+	$textBox0.Size = New-Object System.Drawing.Size(770,20)
+	$textBox0.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox0)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите Name"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,50)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(10,70)
+	$textBox1.Size = New-Object System.Drawing.Size(770,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите password"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,90)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox2 = New-Object System.Windows.Forms.TextBox
+	$textBox2.Location = New-Object System.Drawing.Point(10,110)
+	$textBox2.Size = New-Object System.Drawing.Size(770,20)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox2)
+	
+	$FormLabel3 = New-Object System.Windows.Forms.Label
+	$FormLabel3.Text = "Введите department"
+	$FormLabel3.Location = New-Object System.Drawing.Point(10,130)
+	$FormLabel3.AutoSize = $true
+	$FormLabel3.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel3)
+
+	$textBox3 = New-Object System.Windows.Forms.TextBox
+	$textBox3.Location = New-Object System.Drawing.Point(10,150)
+	$textBox3.Size = New-Object System.Drawing.Size(770,20)
+	$textBox3.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox3)
+
+	$FormLabel4 = New-Object System.Windows.Forms.Label
+	$FormLabel4.Text = "Введите title"
+	$FormLabel4.Location = New-Object System.Drawing.Point(10,170)
+	$FormLabel4.AutoSize = $true
+	$FormLabel4.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel4)
+
+	$textBox4 = New-Object System.Windows.Forms.TextBox
+	$textBox4.Location = New-Object System.Drawing.Point(10,190)
+	$textBox4.Size = New-Object System.Drawing.Size(770,20)
+	$textBox4.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox4)
+
+	$FormLabel5 = New-Object System.Windows.Forms.Label
+	$FormLabel5.Text = "Введите phone"
+	$FormLabel5.Location = New-Object System.Drawing.Point(10,210)
+	$FormLabel5.AutoSize = $true
+	$FormLabel5.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel5)
+
+	$textBox5 = New-Object System.Windows.Forms.TextBox
+	$textBox5.Location = New-Object System.Drawing.Point(10,230)
+	$textBox5.Size = New-Object System.Drawing.Size(770,20)
+	$textBox5.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox5)
+
+	$FormLabel6 = New-Object System.Windows.Forms.Label
+	$FormLabel6.Text = "Введите emplID"
+	$FormLabel6.Location = New-Object System.Drawing.Point(10,250)
+	$FormLabel6.AutoSize = $true
+	$FormLabel6.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel6)
+
+	$textBox6 = New-Object System.Windows.Forms.TextBox
+	$textBox6.Location = New-Object System.Drawing.Point(10,270)
+	$textBox6.Size = New-Object System.Drawing.Size(770,20)
+	$textBox6.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox6)
+
+	$FormLabel7 = New-Object System.Windows.Forms.Label
+	$FormLabel7.Text = "Введите emplNumb"
+	$FormLabel7.Location = New-Object System.Drawing.Point(10,290)
+	$FormLabel7.AutoSize = $true
+	$FormLabel7.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel7)
+
+	$textBox7 = New-Object System.Windows.Forms.TextBox
+	$textBox7.Location = New-Object System.Drawing.Point(10,310)
+	$textBox7.Size = New-Object System.Drawing.Size(770,20)
+	$textBox7.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox7)
+	
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,340)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,340)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	#записываем данные в переменные
+	$Name = $textBox1.text
+	$Password = $textBox2.text
+	$Department = $textBox3.text
+	$Title = $textBox4.text
+	$Phone = $textBox5.text
+	$emplID = $textBox6.text
+	$emplNumb = $textBox7.text
+	$Domain = $textBox0.text
+	
+	$fio = "$($Name)"
+	$f = $fio.split(' ')[0]
+	$i = $fio.split(' ')[1]
+	$o = $fio.split(' ')[2]
+
+	#генерим из транслитерата имя учетки по шаблону "name.lastname"
+	$user = $transFirstName + '.' + $transLastName
+
+	#генерим имя входа и адрес электронной почты
+	$userna = $user + '@aspg.novatek.int'
+	$email = $user + '@arcticspg.ru'
+
+	#собственно само добавление учетки
+	New-ADuser -Name $Name -Surname $f -GivenName $i -Initials $o.Chars(0) -DisplayName $Name -UserPrincipalName $userna `
+	-Department $Department -Title $Title `
+	-City "Москва" -Country "RU" -PostalCode "117393" -StreetAddress "ул.Академика Пилюгина д.22" -HomePage "http://book.novatek.int/" `
+	-Path "ou=Users,ou=_Office_Udalcova_1,dc=aspg,dc=novatek,dc=int" -AccountPassword (ConvertTo-SecureString -AsPlainText $Password -Force) -Company 'ООО "Арктик СПГ2"' `
+	-SamAccountName $user -ChangePasswordAtLogon $true -Enabled $true `
+	#-OfficePhone $Phone -OtherAttributes @{'employeeID'=$emplID;'employeeNumber'=$emplNumb} -EmailAddress $email `
+	Add-AdGroupMember -Identity ArcticSPG_group -Members $user
+	Add-AdGroupMember -Identity DCM_Users -Members $user
+	} elseif ($result -eq [System.Windows.Forms.DialogResult]::NO) {
+		#добавляем форму и спрашиваем название файла, откуда брать данные пользователей
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 200
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате CSV"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите OU"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,70)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox1 = New-Object System.Windows.Forms.TextBox
+		$textBox1.Location = New-Object System.Drawing.Point(121,100)
+		$textBox1.Size = New-Object System.Drawing.Size(260,20)
+		$textBox1.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox1)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,130)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+		$DomainName = $textBox1.text
+		
+		$flag1 = $False
+		
+		#для каждого пользователя из файла создаем учетку
+		ForEach ($_ In $File) {
+			#дергаем ФИО из поля Name csv-файл, заворачиваем в переменную, разбиваем её
+			#на 3 значения и записываем в другие 3 переменные
+			$fio = "$($_.Name)"
+			$f = $fio.split(' ')[0]
+			$i = $fio.split(' ')[1]
+			$o = $fio.split(' ')[2]
+
+			#генерим из транслитерата имя учетки по шаблону "name.lastname"
+			$user = $transFirstName + '.' + $transLastName
+
+			#генерим имя входа и адрес электронной почты
+			$userna = $user + '@aspg.novatek.int'
+			#$email = $user + '@arcticspg.ru'
+
+			#собственно само добавление учетки
+			New-ADuser -Name $_.Name -Surname $f -GivenName $i -Initials $o.Chars(0) -DisplayName $_.Name -UserPrincipalName $userna `
+			-Department $_.Department -Title $_.Title -Description $_.Description `
+			-City "Москва" -Country "RU" -PostalCode "117393" -StreetAddress "ул.Академика Пилюгина д.22" -HomePage "http://book.novatek.int/" `
+			-Path "ou=Users,ou=_Office_Udalcova_1,dc=aspg,dc=novatek,dc=int" -AccountPassword (ConvertTo-SecureString -AsPlainText $_.Password -Force) -Company 'ООО "Арктик СПГ2"' `
+			-SamAccountName $user -ChangePasswordAtLogon $true -Enabled $true `
+			#-OfficePhone $_.Phone -OtherAttributes @{'employeeID'=$_.emplID;'employeeNumber'=$_.emplNumb} -EmailAddress $email `
+			#-ScriptPath $_.ScriptPath `
+			Add-AdGroupMember -Identity ArcticSPG_group -Members $user
+			Add-AdGroupMember -Identity DCM_Users -Members $user
+
+			#смотрим, нет ли у записи двойника
+			$new_user = Get-ADUser -Filter {Name -eq $fio -or SamAccountName -eq $user} -SearchBase $DomainName
+			if ($new_user){
+				Write-Warning -Message $fio
+				$flag1 = $True
+			}
+
+			#выводим в файл всех добавленных пользователей с пометкой двойников
+			if ($flag1){
+				Out-File -FilePath ".\created.txt" -InputObject "$user(double)" -Encoding UTF8 -Append -NoClobber
+			} else {
+				Out-File -FilePath ".\created.txt" -InputObject $user -Encoding UTF8 -Append -NoClobber
+			}
+
+			$flag1 = $False
+		}
+	} else {
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите OU, в котором вы создали пользователей"
+		$FormLabel.Location = New-Object System.Drawing.Point(10,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox1 = New-Object System.Windows.Forms.TextBox
+		$textBox1.Location = New-Object System.Drawing.Point(10,40)
+		$textBox1.Size = New-Object System.Drawing.Size(200,20)
+		$textBox1.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox1)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(10,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+
+		$DomainName = $textBox1.text
+		$Table = Get-ADUser -filter * -searchbase $DomainName -properties *
+		$Count = ($Table).Count
+		if ($Count -ne 0) {
+		$some = 100 / $Count
+		$somesome = 100 / $Count
+		}
+
+		#функция, которая записывает все названия групп в список в форме и параллельно меняет состояние progress bar
+		function foo {
+		$listBox1.Items.clear()
+		ForEach ($Item In $Table) {
+			[void] $listBox1.Items.Add($Item.Cn)
+			$somesome += $some
+			$progressBar.value = $somesome
+		}
+		}
+
+		#функция, которая создает форму и возвращает название выбранной пользователем группы и типов пользователей
+		Function doit {
+	
+		#добавляет основную форму
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 800
+		$Form.Height = 440
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel4 = New-Object System.Windows.Forms.Label
+		$FormLabel4.Text = "Выберите созданных пользователей"
+		$FormLabel4.Location = New-Object System.Drawing.Point(10, 10)
+		$FormLabel4.Width = 770
+		$FormLabel4.Height = 20
+		$FormLabel4.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel4)
+
+		$listBox1 = New-Object System.Windows.Forms.ListBox
+		$listBox1.SelectionMode = 'MultiExtended'
+		$listBox1.Location = New-Object System.Drawing.Point(10,40)
+		$listBox1.Size = New-Object System.Drawing.Size(770,20)
+		$listBox1.Height = 200
+		$listBox1.Sorted = $true
+		$form.Controls.Add($listBox1)
+
+		$script:progressBar = New-Object System.Windows.Forms.ProgressBar
+		$progressBar.Name = 'ProgressBar'
+		$progressBar.Value = 0
+		$progressBar.Style = "Continuous"
+		$progressBar.Maximum = 100
+		$progressBar.Step = 1
+		$progressBar.Location = New-Object System.Drawing.Size (10,280)
+		$progressBar.Size = New-Object System.Drawing.Size (700,20)
+		$Form.Controls.Add($progressBar)
+
+		$button1 = New-Object system.windows.Forms.Button
+		$button1.BackColor = "#84CBFF"
+		$button1.Text = "OK"
+		$button1.Width = 40
+		$button1.Height = 20
+		$button1.location = new-object system.drawing.point(10,370)
+		$button1.DialogResult = [System.Windows.Forms.DialogResult]::NO
+		$button1.Font = "Microsoft Sans Serif,8"
+		$Form.controls.Add($button1)
+	
+		$button2 = New-Object system.windows.Forms.Button
+		$button2.BackColor = "#84CBFF"
+		$button2.Text = "Начать выгрузку пользователей"
+		$button2.Width = 200
+		$button2.Height = 20
+		$button2.location = new-object system.drawing.point(10,250)
+		$button2.add_click({foo})
+		$button2.Font = "Microsoft Sans Serif,8"
+		$Form.controls.Add($button2)
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла, куда выписать повторяющихся пользователей"
+		$FormLabel.Location = New-Object System.Drawing.Point(10,310)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox1 = New-Object System.Windows.Forms.TextBox
+		$textBox1.Location = New-Object System.Drawing.Point(10,340)
+		$textBox1.Size = New-Object System.Drawing.Size(770,20)
+		$textBox1.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox1)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+
+		return @($textBox1.text, $listbox1.selecteditems)
+		}
+
+		$res = doit
+		$flaggg = $true
+		$search = @()
+		ForEach ($Item In $res) {
+			if ($flaggg) {
+				$FileName = $item
+			} else {
+				$search += $item
+			}
+			$flaggg = $False
+		}
+
+		$objForest = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+		$DomainList = @($objForest.Domains | Select-Object Name)
+		$Domains = $DomainList | foreach {$_.Name}
+		$wowflag = $true
+		ForEach ($Item In $search) {
+			$User = Get-ADUser -filter {Cn -eq $item} -searchbase $DomainName -properties *
+			ForEach ($Domain In $Domains) {
+				$NewUser = Get-ADUser -filter {SamAccountName -eq $User.SamAccountName} -server $Domain -properties *
+				if ($NewUser -ne $Null) {
+					$Double = @{}
+					$Double[$user.SamAccountName] = $Domain
+					if ($wowflag) {
+						$double.GetEnumerator() | select @{l='Name'; e={$_.Key}}, @{l='Domain'; e={$_.Value}} | Export-CSV $FileName -Encoding UTF8 -delimiter ";"
+						$wowflag = $False
+					} else {
+						$double.GetEnumerator() | select @{l='Name'; e={$_.Key}}, @{l='Domain'; e={$_.Value}} | Export-CSV $FileName -Encoding UTF8 -delimiter ";" -append
+					} 
+				}
+			}
+		}
+	}
+} elseif ($result -eq [System.Windows.Forms.DialogResult]::ABORT) {
+	#создает форму и спрашивает, пользователей какого типа хотим искать и принимает ограничения
+	Add-Type -AssemblyName System.Windows.Forms
+
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 340
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Выберите тип неактивных пользователей"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,130)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$listBox2 = New-Object System.Windows.Forms.ListBox
+	$listBox2.SelectionMode = 'MultiExtended'
+	$listBox2.Location = New-Object System.Drawing.Point(10,160)
+	$listBox2.Size = New-Object System.Drawing.Size(770,20)
+	$listBox2.Height = 40
+	$listBox2.Sorted = $true
+	[void] $listBox2.Items.Add('user')
+	[void] $listBox2.Items.Add('computer')
+	$form.Controls.Add($listBox2)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите ограничения"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Создан не позже, чем"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,40)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(165,40)
+	$textBox1.Size = New-Object System.Drawing.Size(30,15)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "дней назад"
+	$FormLabel1.Location = New-Object System.Drawing.Point(210,40)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Изменен не позже, чем"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,70)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox2 = New-Object System.Windows.Forms.TextBox
+	$textBox2.Location = New-Object System.Drawing.Point(165,70)
+	$textBox2.Size = New-Object System.Drawing.Size(30,15)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox2)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "дней назад"
+	$FormLabel1.Location = New-Object System.Drawing.Point(210,70)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Неактивен уже больше"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,100)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox3 = New-Object System.Windows.Forms.TextBox
+	$textBox3.Location = New-Object System.Drawing.Point(165,100)
+	$textBox3.Size = New-Object System.Drawing.Size(30,15)
+	$textBox3.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox3)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "дней"
+	$FormLabel1.Location = New-Object System.Drawing.Point(210,100)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите название OU"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,200)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox4 = New-Object System.Windows.Forms.TextBox
+	$textBox4.Location = New-Object System.Drawing.Point(10,230)
+	$textBox4.Size = New-Object System.Drawing.Size(770,15)
+	$textBox4.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox4)
+	
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,260)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::OK
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,260)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+
+	if ([string]::IsNullOrEmpty($textbox3.text)) {
+		$LogonLim = Get-Date
+	} else {
+		$T = $textbox3 -match "\d+"|%{$matches[0]}
+		$LogonLim = (Get-Date).adddays(-$T)
+	}
+	if ([string]::IsNullOrEmpty($textbox1.text)) {
+		$CreatedLim = Get-Date
+	} else {
+		$F = $textbox1 -match "\d+"|%{$matches[0]}
+		$CreatedLim = (Get-Date).adddays(-$F)
+	}
+	if ([string]::IsNullOrEmpty($textbox2.text)) {
+		$ChangedLim = Get-Date
+	} else {
+		$S = $textbox2 -match "\d+"|%{$matches[0]}
+		$ChangedLim = (Get-Date).adddays(-$S)
+	}
+	$DomainName = $textbox4.text
+	
+	if ($listBox2.text -eq 'user') {
+	
+	$Table = Get-ADUser -Filter {LastLogon -le $LogonLim -and WhenCreated -le $CreatedLim -and WhenChanged -le $ChangedLim} -SearchBase $DomainName -properties * | Where-Object {$_.Enabled -eq $true}
+
+	#считаем количество нужных пользователей
+	$Count = ($Table).Count
+
+	#создание формы, которая выводит всех запрошенных пользователей и спрашивает, вывести ли их в отчет
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 500
+	$Form.Height = 510
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$listBox = New-Object System.Windows.Forms.ListBox
+	$listBox.SelectionMode = 'MultiExtended'
+	$listBox.Location = New-Object System.Drawing.Point(50,20)
+	$listBox.Size = New-Object System.Drawing.Size(400,20)
+	$listBox.Height = 370
+	$listBox.Sorted = $true
+	ForEach ($Item In $Table) {
+		[void] $listBox.Items.Add($Item.Name)
+	}
+	$form.Controls.Add($listBox)
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Вывести отчет с датами последней авторизации в файл?"
+	$textBox2.Width = 500
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(1,400)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Да!"
+	$button3.Width = 50
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(100,430)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Нет"
+	$button4.Width = 50
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(350,430)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+ 
+	$result = $form.ShowDialog()
+	$Form.Dispose()
+
+	#Создает файл
+	if ($result -eq [System.Windows.Forms.DialogResult]::YES) {
+		#создает форму и спрашивает, как выбрать файл
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 800
+		$Form.Height = 120
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$textBox2 = New-Object System.Windows.Forms.Label
+		$textBox2.Text = "Создать файл или выбрать из уже созданных?"
+		$textBox2.Width = 770
+		$textBox2.Height = 20
+		$textBox2.location = new-object system.drawing.point(10,10)
+		$textBox2.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($textBox2)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "Создать"
+		$button3.Width = 100
+		$button3.Height = 30
+		$button3.location = new-object system.drawing.point(10,40)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+ 
+		$button4 = New-Object system.windows.Forms.Button
+		$button4.BackColor = "#84CBFF"
+		$button4.Text = "Выбрать"
+		$button4.Width = 100
+		$button4.Height = 30
+		$button4.location = new-object system.drawing.point(260,40)
+		$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+		$button4.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button4)
+
+		$button1 = New-Object system.windows.Forms.Button
+		$button1.BackColor = "#84CBFF"
+		$button1.Text = "Вернуться в главное меню"
+		$button1.Width = 200
+		$button1.Height = 30
+		$button1.location = new-object system.drawing.point(500,40)
+		$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+		$button1.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button1)
+
+		$newresult = $form.ShowDialog()
+		$Form.Dispose()
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+			continue
+		}
+
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате csv"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+		} else {
+		
+		#форма, позволяющая выбрать файл
+		Add-Type -AssemblyName System.Windows.Forms
+		$f = new-object Windows.Forms.OpenFileDialog
+		$f.InitialDirectory = pwd
+		$f.Filter = "All Files (*.*)|*.*"
+		$f.ShowHelp = $true
+		[void]$f.ShowDialog()
+		$File = $f.FileName
+		}
+
+		#создаем словарь, чтобы отредактировать формат даты и найти неавторизованных людей 
+		$result = @{}
+		ForEach ($item In $Table) {
+			if ($item.LastLogon -eq 0) {
+				$DateStr = 'Not Logon'
+			} else {
+				$DateStr = ([datetime]::FromFileTime($item.LastLogon)).ToString('dd/MM/yyyy')
+			}
+			$DateCreated = ($item.WhenCreated).ToString('dd/MM/yyyy')
+			$DateChanged = ($item.WhenChanged).ToString('dd/MM/yyyy')
+			$list = @($DateStr, $DateCreated, $DateChanged)
+			$result[$item.Name] = $list
+		}
+		#непосредственно отчет
+		$result.GetEnumerator() | select @{l='Name'; e={$_.Key}}, @{l='Last Logon'; e={$_.Value[0]}}, @{l='When Created'; e={$_.Value[1]}}, @{l='When Changed'; e={$_.Value[2]}} | Export-CSV $File -Encoding UTF8 -delimiter ";"
+	}
+	} else {
+	
+	#Находим компьютеры, которые не входили в систему уже больше, чем дней
+	$Table = Get-ADComputer -Filter {LastLogon -le $LogonLim -and WhenCreated -le $CreatedLim -and WhenChanged -le $ChangedLim} -SearchBase $DomainName -properties * | Where-Object {$_.Enabled -eq $true}
+
+	#считаем количество нужных компьютеров
+	$Count = ($Table).Count
+
+	#создание формы, которая выводит всех запрошенных пользователей и спрашивает, вывести ли их в отчет
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 500
+	$Form.Height = 510
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$listBox = New-Object System.Windows.Forms.ListBox
+	$listBox.SelectionMode = 'MultiExtended'
+	$listBox.Location = New-Object System.Drawing.Point(50,20)
+	$listBox.Size = New-Object System.Drawing.Size(400,20)
+	$listBox.Height = 370
+	$listBox.Sorted = $true
+	ForEach ($Item In $Table) {
+		[void] $listBox.Items.Add($Item.Name)
+	}
+	$form.Controls.Add($listBox)
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Вывести отчет с датами последней авторизации в файл?"
+	$textBox2.Width = 500
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(1,400)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Да!"
+	$button3.Width = 50
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(100,430)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Нет"
+	$button4.Width = 50
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(350,430)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+ 
+	$result = $form.ShowDialog()
+	$Form.Dispose()
+
+	#Создает файл
+	if ($result -eq [System.Windows.Forms.DialogResult]::YES) {
+		#создает форму и спрашивает, как выбрать файл
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 800
+		$Form.Height = 120
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$textBox2 = New-Object System.Windows.Forms.Label
+		$textBox2.Text = "Создать файл или выбрать из уже созданных?"
+		$textBox2.Width = 770
+		$textBox2.Height = 20
+		$textBox2.location = new-object system.drawing.point(10,10)
+		$textBox2.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($textBox2)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "Создать"
+		$button3.Width = 100
+		$button3.Height = 30
+		$button3.location = new-object system.drawing.point(10,40)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+ 
+		$button4 = New-Object system.windows.Forms.Button
+		$button4.BackColor = "#84CBFF"
+		$button4.Text = "Выбрать"
+		$button4.Width = 100
+		$button4.Height = 30
+		$button4.location = new-object system.drawing.point(260,40)
+		$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+		$button4.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button4)
+
+		$button1 = New-Object system.windows.Forms.Button
+		$button1.BackColor = "#84CBFF"
+		$button1.Text = "Вернуться в главное меню"
+		$button1.Width = 200
+		$button1.Height = 30
+		$button1.location = new-object system.drawing.point(500,40)
+		$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+		$button1.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button1)
+
+		$newresult = $form.ShowDialog()
+		$Form.Dispose()
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+			continue
+		}
+
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате csv"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+		} else {
+		
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+		$f = new-object Windows.Forms.OpenFileDialog
+		$f.InitialDirectory = pwd
+		$f.Filter = "All Files (*.*)|*.*"
+		$f.ShowHelp = $true
+		[void]$f.ShowDialog()
+		$File = $f.FileName
+		}
+
+		#создаем словарь, чтобы отредактировать формат даты и найти неавторизованных компов 
+		$result = @{}
+		ForEach ($item In $Table) {
+			if ($item.LastLogon -eq 0) {
+				$DateStr = 'Not Logon'
+			} else {
+				$DateStr = ([datetime]::FromFileTime($item.LastLogon)).ToString('dd/MM/yyyy')
+			}
+			$DateCreated = ($item.WhenCreated).ToString('dd/MM/yyyy')
+			$DateChanged = ($item.WhenChanged).ToString('dd/MM/yyyy')
+			$list = @($DateStr, $DateCreated, $DateChanged)
+			$result[$item.Name] = $list
+		}
+		#непосредственно отчет
+		$result.GetEnumerator() | select @{l='Name'; e={$_.Key}}, @{l='Last Logon'; e={$_.Value[0]}}, @{l='When Created'; e={$_.Value[1]}}, @{l='When Changed'; e={$_.Value[2]}} | Export-CSV $File -Encoding UTF8 -delimiter ";"
+	}
+	}
+} elseif ($result -eq [System.Windows.Forms.DialogResult]::IGNORE) {
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 120
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Узнать об обновлениях или о самих OC?"
+	$textBox2.Width = 770
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(10,10)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Посмотреть обновления"
+	$button3.Width = 200
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(10,40)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Посмотреть OC"
+	$button4.Width = 150
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(260,40)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 30
+	$button1.location = new-object system.drawing.point(500,40)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::NO) {
+
+	#форма, которая спрашивает название OU
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 200
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Введите название OU, в котором искать компьютеры"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,10)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(10,40)
+	$textBox1.Size = New-Object System.Drawing.Size(770,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(550,120)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+	
+	#сохраняем в переменную
+	$DomainName = $textBox1.text
+
+	#создает форму и спрашивает, как выбрать файл
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 120
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Создать файл или выбрать из уже созданных?"
+	$textBox2.Width = 770
+	$textBox2.Height = 30
+	$textBox2.location = new-object system.drawing.point(10,10)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Создать"
+	$button3.Width = 100
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(10,40)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Выбрать"
+	$button4.Width = 100
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(260,40)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 30
+	$button1.location = new-object system.drawing.point(500,40)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате csv"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+	} else {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+		$f = new-object Windows.Forms.OpenFileDialog
+		$f.InitialDirectory = pwd
+		$f.Filter = "All Files (*.*)|*.*"
+		$f.ShowHelp = $true
+		[void]$f.ShowDialog()
+		$File = $f.FileName
+	}
+	Get-ADComputer -filter * -SearchBase $DomainName -properties * | Select-Object Name, OperatingSystem | Export-CSV $File -Encoding UTF8 -delimiter ";"
+	} else {
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 130
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "Найти компьютеры"
+	$FormLabel1.Location = New-Object System.Drawing.Point(10,15)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$listBox1 = New-Object System.Windows.Forms.ListBox
+	$listBox1.SelectionMode = 'MultiExtended'
+	$listBox1.Location = New-Object System.Drawing.Point(138,10)
+	$listBox1.Size = New-Object System.Drawing.Size(40,20)
+	$listBox1.Height = 40
+	[void] $listBox1.Items.Add('без')
+	[void] $listBox1.Items.Add('с')
+	$Form.Controls.Add($listBox1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "обновления(ем)"
+	$FormLabel1.Location = New-Object System.Drawing.Point(190,15)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(300,15)
+	$textBox1.Size = New-Object System.Drawing.Size(100,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "в OU"
+	$FormLabel1.Location = New-Object System.Drawing.Point(410,15)
+	$FormLabel1.AutoSize = $true
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$textBox2 = New-Object System.Windows.Forms.TextBox
+	$textBox2.Location = New-Object System.Drawing.Point(450,15)
+	$textBox2.Size = New-Object System.Drawing.Size(200,20)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox2)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,45)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::OK
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "Вернуться в главное меню"
+	$button1.Width = 200
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(450,45)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+	$button1.Font = "Microsoft Sans Serif,8"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$Form.Dispose()
+	
+	#если пользователь нажал вернуться в главное меню, то сработает этот if, и он вернется
+	if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+		continue
+	}
+	
+	$DomainName = $TextBox2.text
+	$Select = $listBox1.text
+	$upd = $textbox1.text
+
+	$Table = Get-ADComputer -filter {OperatingSystem -like '*Windows*'} -SearchBase $DomainName -properties *
+	$NewTable = @()
+
+	ForEach ($item In $Table) {
+	if ($select -eq 'с') {
+		try { 
+		if ((Get-HotFix -ComputerName $item.Name).hotfixid -contains $upd) {
+			$NewTable += $item
+		}
+		} catch {}
+	} else {
+		try { 
+		if ((Get-HotFix -ComputerName $item.Name).hotfixid -notcontains $upd) {
+			$NewTable += $item
+		}
+		} catch {}
+	}
+	}
+	
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 500
+	$Form.Height = 510
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$listBox = New-Object System.Windows.Forms.ListBox
+	$listBox.SelectionMode = 'MultiExtended'
+	$listBox.Location = New-Object System.Drawing.Point(50,20)
+	$listBox.Size = New-Object System.Drawing.Size(400,20)
+	$listBox.Height = 370
+	$listBox.Sorted = $true
+	ForEach ($Item In $NewTable) {
+		[void] $listBox.Items.Add($Item.Name)
+	}
+	$form.Controls.Add($listBox)
+
+	$textBox2 = New-Object System.Windows.Forms.Label
+	$textBox2.Text = "Вывести отчет в файл?"
+	$textBox2.Width = 500
+	$textBox2.Height = 20
+	$textBox2.location = new-object system.drawing.point(1,400)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($textBox2)
+
+	$button3 = New-Object system.windows.Forms.Button
+	$button3.BackColor = "#84CBFF"
+	$button3.Text = "Да!"
+	$button3.Width = 50
+	$button3.Height = 30
+	$button3.location = new-object system.drawing.point(100,430)
+	$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button3.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button3)
+ 
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Нет"
+	$button4.Width = 50
+	$button4.Height = 30
+	$button4.location = new-object system.drawing.point(350,430)
+	$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+ 
+	$result = $form.ShowDialog()
+	$Form.Dispose()
+
+	#Создает файл
+	if ($result -eq [System.Windows.Forms.DialogResult]::YES) {
+		#создает форму и спрашивает, как выбрать файл
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 800
+		$Form.Height = 120
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$textBox2 = New-Object System.Windows.Forms.Label
+		$textBox2.Text = "Создать файл или выбрать из уже созданных?"
+		$textBox2.Width = 770
+		$textBox2.Height = 20
+		$textBox2.location = new-object system.drawing.point(10,10)
+		$textBox2.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($textBox2)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "Создать"
+		$button3.Width = 100
+		$button3.Height = 30
+		$button3.location = new-object system.drawing.point(10,40)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+ 
+		$button4 = New-Object system.windows.Forms.Button
+		$button4.BackColor = "#84CBFF"
+		$button4.Text = "Выбрать"
+		$button4.Width = 100
+		$button4.Height = 30
+		$button4.location = new-object system.drawing.point(260,40)
+		$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+		$button4.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button4)
+
+		$button1 = New-Object system.windows.Forms.Button
+		$button1.BackColor = "#84CBFF"
+		$button1.Text = "Вернуться в главное меню"
+		$button1.Width = 200
+		$button1.Height = 30
+		$button1.location = new-object system.drawing.point(500,40)
+		$button1.DialogResult = [System.Windows.Forms.DialogResult]::CANCEL
+		$button1.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button1)
+
+		$newresult = $form.ShowDialog()
+		$Form.Dispose()
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::CANCEL) {
+			continue
+		}
+
+		if ($newresult -eq [System.Windows.Forms.DialogResult]::YES) {
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+ 
+		$Form = New-Object system.Windows.Forms.Form
+		$Form.Text = "Form"
+		$Form.BackColor = "#E2F5FF"
+		$Form.TopMost = $true
+		$Form.Width = 502
+		$Form.Height = 140
+		$Form.MaximizeBox = $false
+		$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+		$FormLabel = New-Object System.Windows.Forms.Label
+		$FormLabel.Text = "Введите название файла в формате csv"
+		$FormLabel.Location = New-Object System.Drawing.Point(1,10)
+		$FormLabel.AutoSize = $true
+		$FormLabel.Font = "Microsoft Sans Serif,10"
+		$Form.Controls.Add($FormLabel)
+	
+		$textBox = New-Object System.Windows.Forms.TextBox
+		$textBox.Location = New-Object System.Drawing.Point(121,40)
+		$textBox.Size = New-Object System.Drawing.Size(260,20)
+		$textBox.Font = "Microsoft Sans Serif,10"
+		$form.Controls.Add($textBox)
+
+		$button3 = New-Object system.windows.Forms.Button
+		$button3.BackColor = "#84CBFF"
+		$button3.Text = "OK"
+		$button3.Width = 50
+		$button3.Height = 20
+		$button3.location = new-object system.drawing.point(226,70)
+		$button3.DialogResult = [System.Windows.Forms.DialogResult]::OK
+		$button3.Font = "Microsoft Sans Serif,10"
+		$Form.controls.Add($button3)
+
+		$result = $form.ShowDialog()
+		$Form.Dispose()
+		$File = $textBox.text
+		} else {
+		
+		#форма, спрашивающая название файла
+		Add-Type -AssemblyName System.Windows.Forms
+		$f = new-object Windows.Forms.OpenFileDialog
+		$f.InitialDirectory = pwd
+		$f.Filter = "All Files (*.*)|*.*"
+		$f.ShowHelp = $true
+		[void]$f.ShowDialog()
+		$File = $f.FileName
+		}
+		
+		Out-File -FilePath $File -InputObject '' -Encoding UTF8
+		#непосредственно отчет
+		ForEach ($item In $NewTable) {
+        		Out-File -FilePath $File -InputObject $item.Name -Encoding UTF8 -Append -NoClobber
+		}
+	}
+	}
+}
+
+#если пользователь не закрыл изначальную форму крестиком и не нажимал на выход сообщаем ему, что действие выполнено
+if ($result -ne [System.Windows.Forms.DialogResult]::CANCEL) {
+
+#создание самой формы
+Add-Type -AssemblyName System.Windows.Forms
+ 
+$Form = New-Object system.Windows.Forms.Form
+$Form.Text = "Form"
+$Form.BackColor = "#E2F5FF"
+$Form.TopMost = $true
+$Form.Width = 800
+$Form.Height = 150
+$Form.MaximizeBox = $false
+$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+$textBox2 = New-Object System.Windows.Forms.Label
+$textBox2.Text = "Готово! Вернуться в главное меню?"
+$textBox2.Width = 770
+$textBox2.Height = 30
+$textBox2.TextAlign = 2
+$textBox2.location = new-object system.drawing.point(10,10)
+$textBox2.Font = "Microsoft Sans Serif,15"
+$Form.controls.Add($textBox2)
+ 
+$button3 = New-Object system.windows.Forms.Button
+$button3.BackColor = "#84CBFF"
+$button3.Text = "Да!"
+$button3.Width = 50
+$button3.Height = 30
+$button3.location = new-object system.drawing.point(10,50)
+$button3.DialogResult = [System.Windows.Forms.DialogResult]::YES
+$button3.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button3)
+ 
+$button4 = New-Object system.windows.Forms.Button
+$button4.BackColor = "#84CBFF"
+$button4.Text = "Нет"
+$button4.Width = 50
+$button4.Height = 30
+$button4.location = new-object system.drawing.point(700,50)
+$button4.DialogResult = [System.Windows.Forms.DialogResult]::NO
+$button4.Font = "Microsoft Sans Serif,10"
+$Form.controls.Add($button4)
+ 	
+$newresult1 = $form.ShowDialog()
+$Form.Dispose()
+ 
+#если пользователь нажал на выйти, то меняем значение флага и выходим из основного цикла
+if ($newresult1 -eq [System.Windows.Forms.DialogResult]::NO -or $newresult1 -eq [System.Windows.Forms.DialogResult]::CANCEL) {$flag = $false}
+} else {$flag = $false}
+}
+
+#отчищаем все исользованные переменные
+Remove-Variable -Name * -Force -ErrorAction SilentlyContinue
