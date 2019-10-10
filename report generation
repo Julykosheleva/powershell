@@ -1,0 +1,327 @@
+Function fun1 {
+	$f1 = new-object Windows.Forms.OpenFileDialog
+	$f1.InitialDirectory = pwd
+	$f1.Filter = "All Files (*.*)|*.*"
+	$f1.ShowHelp = $true
+	[void]$f1.ShowDialog()
+	$Global:FirstFile = $f1.FileName
+	$FormLabel0.Text = $f1.FileName
+	}
+
+	Function fun2 {
+	$f2 = new-object Windows.Forms.OpenFileDialog
+	$f2.InitialDirectory = pwd
+	$f2.Filter = "All Files (*.*)|*.*"
+	$f2.ShowHelp = $true
+	[void]$f2.ShowDialog()
+	$Global:abbreviations = Import-Csv -Encoding default -Path $f2.filename -Delimiter ';'
+	$FormLabel1.Text = $f2.filename
+	}
+	
+	#создание формы, которая спрашивает названия файлов
+	Add-Type -AssemblyName System.Windows.Forms
+ 
+	$Form = New-Object system.Windows.Forms.Form
+	$Form.Text = "Form"
+	$Form.BackColor = "#E2F5FF"
+	$Form.TopMost = $true
+	$Form.Width = 800
+	$Form.Height = 380
+	$Form.MaximizeBox = $false
+	$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Fixed3D
+
+	$button4 = New-Object system.windows.Forms.Button
+	$button4.BackColor = "#84CBFF"
+	$button4.Text = "Выбрать файл Excel"
+	$button4.Width = 200
+	$button4.Height = 20
+	$button4.location = new-object system.drawing.point(10,10)
+	$button4.add_click({fun1})
+	$button4.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button4)
+
+	$button5 = New-Object system.windows.Forms.Button
+	$button5.BackColor = "#84CBFF"
+	$button5.Text = "Выбрать файл с сокращениями отделов"
+	$button5.Width = 300
+	$button5.Height = 20
+	$button5.location = new-object system.drawing.point(300,10)
+	$button5.add_click({fun2})
+	$button5.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button5)
+	
+	$FormLabel0 = New-Object System.Windows.Forms.Label
+	$FormLabel0.Text = "не выбран"
+	$FormLabel0.Location = New-Object System.Drawing.Point(10,35)
+	$FormLabel0.Width = 200
+	$FormLabel0.Height = 15
+	$FormLabel0.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel0)
+
+	$FormLabel1 = New-Object System.Windows.Forms.Label
+	$FormLabel1.Text = "не выбран"
+	$FormLabel1.Location = New-Object System.Drawing.Point(300,35)
+	$FormLabel1.Width = 300
+	$FormLabel1.Height = 15
+	$FormLabel1.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel1)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите название файла, куда сохранить таблицу с управлениями"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,60)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox3 = New-Object System.Windows.Forms.TextBox
+	$textBox3.Location = New-Object System.Drawing.Point(10,90)
+	$textBox3.Size = New-Object System.Drawing.Size(770,20)
+	$textBox3.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox3)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите название файла, куда сохранить итоговую таблицу"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,120)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox1 = New-Object System.Windows.Forms.TextBox
+	$textBox1.Location = New-Object System.Drawing.Point(10,150)
+	$textBox1.Size = New-Object System.Drawing.Size(770,20)
+	$textBox1.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox1)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите название OU"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,180)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox2 = New-Object System.Windows.Forms.TextBox
+	$textBox2.Location = New-Object System.Drawing.Point(10,210)
+	$textBox2.Size = New-Object System.Drawing.Size(770,20)
+	$textBox2.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox2)
+
+	$FormLabel2 = New-Object System.Windows.Forms.Label
+	$FormLabel2.Text = "Введите название файла, куда вывести пользователей, которых нет в штатном расписании"
+	$FormLabel2.Location = New-Object System.Drawing.Point(10,240)
+	$FormLabel2.AutoSize = $true
+	$FormLabel2.Font = "Microsoft Sans Serif,10"
+	$Form.Controls.Add($FormLabel2)
+
+	$textBox4 = New-Object System.Windows.Forms.TextBox
+	$textBox4.Location = New-Object System.Drawing.Point(10,270)
+	$textBox4.Size = New-Object System.Drawing.Size(770,20)
+	$textBox4.Font = "Microsoft Sans Serif,10"
+	$form.Controls.Add($textBox4)
+	
+	$button1 = New-Object system.windows.Forms.Button
+	$button1.BackColor = "#84CBFF"
+	$button1.Text = "OK"
+	$button1.Width = 40
+	$button1.Height = 20
+	$button1.location = new-object system.drawing.point(10,300)
+	$button1.DialogResult = [System.Windows.Forms.DialogResult]::YES
+	$button1.Font = "Microsoft Sans Serif,10"
+	$Form.controls.Add($button1)
+
+	$newresult = $form.ShowDialog()
+	$SecondFile = $textBox3.text
+	$DomainName = $textbox2.text
+	$ExceptFile = $textBox4.text
+	$File = $textbox1.text
+	$Form.Dispose()
+
+$Excel = New-Object -ComObject Excel.Application
+$WorkBook = $Excel.Workbooks.Open($FirstFile)
+$Excel.Visible = $False
+$LogiclDisk = $WorkBook.Worksheets.Item(1)
+
+$LogiclDisk.Cells.Item(1, 1) = "First"
+$LogiclDisk.Cells.Item(1, 2) = "Title"
+$LogiclDisk.Cells.Item(1, 3) = "Cn"
+
+$WorkBook.SaveAs($SecondFile, 6)
+$WorkBook.Close($true)
+
+$csv = @()
+
+$csv = Import-Csv -Encoding default -Path $SecondFile -Delimiter ';'
+
+#создание нового файла для записи отформатированных данных
+$Excel = New-Object -ComObject Excel.Application
+$Excel.Visible = $false
+$WorkBook = $Excel.Workbooks.Add()
+$LogiclDisk = $WorkBook.Worksheets.Item(1)
+
+#заголовки столбцов
+$LogiclDisk.Cells.Item(1,1) = 'Title'
+$LogiclDisk.Cells.Item(1,2) = 'Cn'
+$LogiclDisk.Cells.Item(1,5) = 'DepartmentU'
+$LogiclDisk.Cells.Item(1,3) = 'Department'
+$LogiclDisk.Cells.Item(1,4) = 'Manager'
+
+$Row = 2
+$Column = 1
+$CurrManager = ''
+$CurrDepartment = ''
+$CurrBigManager = ''
+$CurrBigDepartment = ''
+$my_flag = $False
+
+#создание словаря сокращенных названий отделов для быстрого доступа к ним
+$abb = @{}
+
+ForEach ($item In $abbreviations)
+{
+        $abb[$item.A] = $item.B
+}
+
+#цикл для прохода по всем строкам исходного файла и перезаписи в нормальном виде
+ForEach ($item In $csv) {
+	if (-not([string]::IsNullOrEmpty($item.First))) {
+		$CurrDepartment = $item.first
+		if ($item.First.Contains("правлени") -or $item.First.Contains("Служба") -or $item.First.Contains("Промысел")  -or $item.First.Contains("Отдел технической поддержки автоматизированных рабочих мест и информационных систем") -or $item.First.Contains("Отдел информационных технологий и связи") -or $item.First.Contains("Бухгалтерия") -or $item.First.Contains("Финансовый отдел") -or $item.First.Contains("Планово-экономический отдел") -or $item.First.Contains("Участок внутренней логистики") -or $item.First.Contains("Отдел по сопровождению контрактов") -or $item.First.Contains("Административно-хозяйственный") -or $item.First.Contains("документооборота и административной поддержки") -or $item.First.Contains("Отдел переводов") -or $item.First.Contains("Отдел внутренней логистики") -or $item.First.Contains("Отдел транспорта и вахтовых перевозок") -or $item.First.Contains("Отдел внешней логистики и таможни") -or $item.First.Contains("Отдел управления движением материалов и складского учета") -or $item.First.Contains("Сметный отдел") -or $item.First.Contains("Отдел грузоподъемных операций")) {
+			$CurrBigDepartment = $item.First
+			$CurrBigManager = ''
+			$CurrManager = ''
+			$my_flag = $True
+		} else {
+			$CurrManager = ''
+			$my_flag = $False
+		}
+	} elseif ($item.Title.Contains("Всего")) {
+		Continue
+	} elseif ([string]::IsNullOrEmpty($item.First) -and [string]::IsNullOrEmpty($item.Title)) {
+		Continue
+	} else {
+		$LogiclDisk.Cells.Item($Row, $Column) = $item.Title
+		$Column++
+		$LogiclDisk.Cells.Item($Row, $Column) = $item.Cn
+		$Column++
+		if ($my_flag) {
+			$LogiclDisk.Cells.Item($Row, $Column) = ''
+			$Column++
+			if ([string]::IsNullOrEmpty($CurrBigManager) -and $item.Title.Contains("ачальник")) {
+				$CurrBigManager = $item.Cn
+			} else {
+				$LogiclDisk.Cells.Item($Row, $Column) = $CurrBigManager
+			}
+		} else {
+			if ($CurrDepartment.Length -gt 63) {
+                		$LogiclDisk.Cells.Item($Row, $Column) = $abb[$CurrDepartment]
+                	} else {
+                		$LogiclDisk.Cells.Item($Row, $Column) = $CurrDepartment
+                	}
+			$Column++
+			if ([string]::IsNullOrEmpty($CurrManager)) {
+				if ($item.Title.Contains("ачальник отдела")) {
+					$CurrManager = $item.Cn
+				}
+				$LogiclDisk.Cells.Item($Row, $Column) = $CurrBigManager
+			} else {
+				$LogiclDisk.Cells.Item($Row, $Column) = $CurrManager
+			}
+		}	
+		$Column++
+		$LogiclDisk.Cells.Item($Row, $Column) = $CurrBigDepartment
+		$Column = 1
+		$Row++
+	}
+}
+
+#сохраняем отформатированный файл
+$WorkBook.SaveAs($SecondFile, 6)
+$WorkBook.Close($true)
+$Excel.Quit()
+
+
+##########################Непосредственно отчет##############################
+$csv = Import-Csv -Encoding default -Path $SecondFile -Delimiter ';'
+#создание нового файла для записи отформатированных данных
+$Excel = New-Object -ComObject Excel.Application
+$Excel.Visible = $false
+$WorkBook = $Excel.Workbooks.Add()
+$LogiclDisk = $WorkBook.Worksheets.Item(1)
+
+#заголовки столбцов
+$LogiclDisk.Cells.Item(1,1) = 'Фамилия'
+$LogiclDisk.Cells.Item(1,2) = 'Имя'
+$LogiclDisk.Cells.Item(1,3) = 'Oтчество'
+$LogiclDisk.Cells.Item(1,4) = 'Внутрикорпоративный номер абонента'
+$LogiclDisk.Cells.Item(1,5) = 'Городской номер абонента'
+$LogiclDisk.Cells.Item(1,6) = 'Номер мобильного телефона абонента'
+$LogiclDisk.Cells.Item(1,7) = 'Факс'
+$LogiclDisk.Cells.Item(1,8) = 'Департамент'
+$LogiclDisk.Cells.Item(1,9) = 'Управление'
+$LogiclDisk.Cells.Item(1,10) = 'Отдел'
+$LogiclDisk.Cells.Item(1,11) = 'Должность'
+$LogiclDisk.Cells.Item(1,12) = 'Адрес электронной почты'
+$LogiclDisk.Cells.Item(1,13) = 'Кабинет'
+
+$Row = 2
+$Column = 1
+$Table = Get-ADUser -Filter * -SearchBase $DomainName -properties *
+$except = @()
+ForEach ($item In $Table) {
+	if ($Item.mail -eq $Null -or $Item.Title -eq $Null -or $Item.enabled -eq $False) {
+		continue
+	}
+	$flag = $true
+	ForEach($string In $Csv) {
+		if ($string.Cn -like $Item.Cn) {
+			$BigDepartment = $string.DepartmentU
+			$Department = $string.Department
+			$flag = $False
+		}
+	}
+	if ($flag) {
+		$except += $item
+		continue
+	}
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.Surname
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.GivenName
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = ($item.Cn -split "\s")[2]
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.telephoneNumber
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = '+7(495) 720-5053'
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = ""
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = ""
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = ""
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $BigDepartment
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $Department
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.Title
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.Mail
+	$Column++
+	$LogiclDisk.Cells.Item($Row,$Column) = $item.physicalDeliveryOfficeName
+	$Column = 1
+	$Row++
+}	
+
+$WorkBook.SaveAs($File, 6)
+$WorkBook.Close($true)
+$Excel.Quit()
+
+$exception = @{}
+ForEach($Item in $except) {
+	if ($item.LastLogon -eq 0) {
+		$exception[$Item.Cn] = 'Not Logon'
+	} else {
+		$exception[$Item.Cn] = ([datetime]::FromFileTime($item.LastLogon)).ToString('dd/MM/yyyy')
+	}
+}
+
+$exception.GetEnumerator() | select @{l='Name'; e={$_.Key}}, @{l='Last Logon'; e={$_.Value}} | Export-CSV $ExceptFile -Encoding UTF8 -delimiter ";"
